@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context path="/ArduinoSimulatorWeb">
+
+    <Resource name="jdbc/DB" 
+              auth="Container" 
+              type="javax.sql.DataSource"
+              maxTotal="20"
+              maxIdle="10"
+              maxWaitMillis="10000"
+              username="sa"
+              password="Ardu1n0S1mul@t0r"
+              driverClassName="org.h2.Driver"
+              url="jdbc:h2:file:./arduinoSimulatorDatabase;MODE=MySQL;AUTO_SERVER=TRUE"
+              
+              defaultAutoCommit="true"
+              jdbcInterceptors="ConnectionState"
+    />
+    
+    <Resource name="mail/Session"
+              auth="Container"
+              type="javax.mail.Session"
+              
+              mail.smtp.host="localhost"
+              
+              
+    />
+    
+    <!--
+    mail.smtp.from="noreply@example.com"
+    mail.smtp.auth="true"
+    mail.smtp.user=""
+    password=""
+    -->
+    
+</Context>

@@ -1,0 +1,220 @@
+[
+  {
+    "type": "arduino.board.Uno",
+    "id": "6324730b-6107-5a64-5d5e-9143831229b8",
+    "x": 50,
+    "y": 50
+  },
+  {
+    "type": "arduino.Led",
+    "id": "7ced0a47-0ad6-a2f4-abf2-c5b0b1cd0d88",
+    "x": 461,
+    "y": 50
+  },
+  {
+    "type": "arduino.PushButton",
+    "id": "dce07c7d-a7eb-74ce-492d-19098ce88b96",
+    "x": 441,
+    "y": 327
+  },
+  {
+    "type": "draw2d.Connection",
+    "id": "ae48615e-8e61-0f3c-61a5-81d4f4a0b903",
+    "alpha": 1,
+    "angle": 0,
+    "userData": {},
+    "cssClass": "draw2d_Connection",
+    "stroke": 2,
+    "color": "#000000",
+    "outlineStroke": 0,
+    "outlineColor": "none",
+    "policy": "draw2d.policy.line.OrthogonalSelectionFeedbackPolicy",
+    "vertex": [
+      {
+        "x": 307,
+        "y": 230
+      },
+      {
+        "x": 378,
+        "y": 230
+      },
+      {
+        "x": 378,
+        "y": 230
+      },
+      {
+        "x": 542.2,
+        "y": 230
+      },
+      {
+        "x": 542.2,
+        "y": 72.68
+      },
+      {
+        "x": 522.2,
+        "y": 72.68
+      }
+    ],
+    "router": "draw2d.layout.connection.InteractiveManhattanConnectionRouter",
+    "radius": 3,
+    "routingMetaData": {
+      "routedByUserInteraction": true,
+      "fromDir": 1,
+      "toDir": 1
+    },
+    "source": {
+      "node": "6324730b-6107-5a64-5d5e-9143831229b8",
+      "port": "pin13"
+    },
+    "target": {
+      "node": "7ced0a47-0ad6-a2f4-abf2-c5b0b1cd0d88",
+      "port": "anode"
+    }
+  },
+  {
+    "type": "draw2d.Connection",
+    "id": "8b6bd9b1-b98e-c643-3d5d-26516cccae86",
+    "alpha": 1,
+    "angle": 0,
+    "userData": {},
+    "cssClass": "draw2d_Connection",
+    "stroke": 2,
+    "color": "#129CE4",
+    "outlineStroke": 0,
+    "outlineColor": "none",
+    "policy": "draw2d.policy.line.OrthogonalSelectionFeedbackPolicy",
+    "vertex": [
+      {
+        "x": 307,
+        "y": 380
+      },
+      {
+        "x": 373.4,
+        "y": 380
+      },
+      {
+        "x": 373.4,
+        "y": 349.68
+      },
+      {
+        "x": 439.8,
+        "y": 349.68
+      }
+    ],
+    "router": "draw2d.layout.connection.InteractiveManhattanConnectionRouter",
+    "radius": 2,
+    "routingMetaData": {
+      "routedByUserInteraction": false,
+      "fromDir": 1,
+      "toDir": 3
+    },
+    "source": {
+      "node": "6324730b-6107-5a64-5d5e-9143831229b8",
+      "port": "pin2"
+    },
+    "target": {
+      "node": "dce07c7d-a7eb-74ce-492d-19098ce88b96",
+      "port": "p1"
+    }
+  },
+  {
+    "type": "draw2d.Connection",
+    "id": "3eef28d7-1166-d2f9-fc9c-e3cc31afe8ca",
+    "alpha": 1,
+    "angle": 0,
+    "userData": {},
+    "cssClass": "draw2d_Connection",
+    "stroke": 2,
+    "color": "#FF0000",
+    "outlineStroke": 0,
+    "outlineColor": "none",
+    "policy": "draw2d.policy.line.OrthogonalSelectionFeedbackPolicy",
+    "vertex": [
+      {
+        "x": 502.2,
+        "y": 349.68
+      },
+      {
+        "x": 557.2,
+        "y": 349.68
+      },
+      {
+        "x": 557.2,
+        "y": 447.84000000000003
+      },
+      {
+        "x": 43,
+        "y": 447.84000000000003
+      },
+      {
+        "x": 43,
+        "y": 276
+      },
+      {
+        "x": 63,
+        "y": 276
+      }
+    ],
+    "router": "draw2d.layout.connection.InteractiveManhattanConnectionRouter",
+    "radius": 2,
+    "routingMetaData": {
+      "routedByUserInteraction": true,
+      "fromDir": 1,
+      "toDir": 3
+    },
+    "source": {
+      "node": "dce07c7d-a7eb-74ce-492d-19098ce88b96",
+      "port": "p2"
+    },
+    "target": {
+      "node": "6324730b-6107-5a64-5d5e-9143831229b8",
+      "port": "pos1"
+    }
+  },
+  {
+    "type": "draw2d.Connection",
+    "id": "ee698d25-ffc6-287b-d4bc-c2c12a493300",
+    "alpha": 1,
+    "angle": 0,
+    "userData": {},
+    "cssClass": "draw2d_Connection",
+    "stroke": 2,
+    "color": "#000000",
+    "outlineStroke": 0,
+    "outlineColor": "none",
+    "policy": "draw2d.policy.line.OrthogonalSelectionFeedbackPolicy",
+    "vertex": [
+      {
+        "x": 307,
+        "y": 217
+      },
+      {
+        "x": 404.4,
+        "y": 217
+      },
+      {
+        "x": 404.4,
+        "y": 72.68
+      },
+      {
+        "x": 459.8,
+        "y": 72.68
+      }
+    ],
+    "router": "draw2d.layout.connection.InteractiveManhattanConnectionRouter",
+    "radius": 3,
+    "routingMetaData": {
+      "routedByUserInteraction": true,
+      "fromDir": 1,
+      "toDir": 3
+    },
+    "source": {
+      "node": "6324730b-6107-5a64-5d5e-9143831229b8",
+      "port": "gnd1"
+    },
+    "target": {
+      "node": "7ced0a47-0ad6-a2f4-abf2-c5b0b1cd0d88",
+      "port": "cathode"
+    }
+  }
+]

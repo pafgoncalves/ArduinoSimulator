@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>pt.isec.deis.mis</groupId>
+    <artifactId>ArduinoSimulatorWeb</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>war</packaging>
+
+    <name>ArduinoSimulatorWeb</name>
+
+    <properties>
+        
+        <!-- versão da plataforma arduino -->
+        <platform.version>1.0.4</platform.version>
+        <!-- versão do programador do arduino -->
+        <programmer.version>1.0.0-SNAPSHOT</programmer.version>
+        
+        <!-- utilizador por defeito -->
+        <sql.defaultusername>admin</sql.defaultusername>
+        <!-- password do utilizador por defeito MD5(123) -->
+        <sql.defaultpassword>202CB962AC59075B964B07152D234B70</sql.defaultpassword>
+        
+        <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+    
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ArduinoSimulator</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.json</groupId>
+            <artifactId>javax.json-api</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.json</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>1.4.191</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>javax.mail</artifactId>
+            <version>1.6.2</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-web-api</artifactId>
+            <version>7.0</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        
+        <!-- para substituir as variaveis nos ficheiros -->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+
+
+        <plugins>
+            
+            
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.6</version>
+                <executions>
+                    <execution>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${endorsed.dir}</outputDirectory>
+                            <silent>true</silent>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>javax</groupId>
+                                    <artifactId>javaee-endorsed-api</artifactId>
+                                    <version>7.0</version>
+                                    <type>jar</type>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>ArduinoSimulatorProgrammer</artifactId>
+                                    <version>${programmer.version}</version>
+                                    <outputDirectory>${project.build.directory}/programmer</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                    
+                </executions>
+            </plugin>
+   
+            
+            <!-- https://stackoverflow.com/questions/27019460/maven-copy-a-particular-dependency-jar-to-a-specific-directory-in-the-war-file -->
+            <!-- para ir bucar o ficheiro sem saber o nome https://stackoverflow.com/questions/3923129/get-a-list-of-resources-from-classpath-directory -->
+            <!-- outra solução é por o nome num ficheiro de properties https://dzone.com/articles/stamping-version-number-and -->
+            <!-- criar os tgz com o maven:  https://maven.apache.org/plugin-developers/cookbook/generate-assembly.html 
+                                            https://crunchify.com/maven-assembly-plugin-how-to-create-tar-gz-or-zip-archive-for-java-enterprise-project-using-maven/
+                                            ANT -> https://stackoverflow.com/questions/34325932/maven-store-md5-checksum-of-file-and-file-size-in-properties-then-filter-another?lq=1
+                                            https://checksum-maven-plugin.nicoulaj.net/files-mojo.html
+            -->
+            
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>execution0</id>
+                        <phase>prepare-package</phase>
+                        <configuration>
+                            <descriptor>src/main/assembly/package.xml</descriptor>
+                            <finalName>${project.name}-${project.version}/package/arduinosim-${platform.version}</finalName>
+                        </configuration>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>execution1</id>
+                        <phase>prepare-package</phase>
+                        <configuration>
+                            <descriptor>src/main/assembly/tool-i386-apple-darwin.xml</descriptor>
+                            <finalName>${project.name}-${project.version}/package/i386-apple-darwin</finalName>
+                        </configuration>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>execution2</id>
+                        <phase>prepare-package</phase>
+                        <configuration>
+                            <descriptor>src/main/assembly/tool-i686-linux-gnu.xml</descriptor>
+                            <finalName>${project.name}-${project.version}/package/i686-linux-gnu</finalName>
+                        </configuration>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>execution3</id>
+                        <phase>prepare-package</phase>
+                        <configuration>
+                            <descriptor>src/main/assembly/tool-i686-mingw32.xml</descriptor>
+                            <finalName>${project.name}-${project.version}/package/i686-mingw32</finalName>
+                        </configuration>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>execution4</id>
+                        <phase>prepare-package</phase>
+                        <configuration>
+                            <descriptor>src/main/assembly/tool-x86_64-apple-darwin.xml</descriptor>
+                            <finalName>${project.name}-${project.version}/package/x86_64-apple-darwin</finalName>
+                        </configuration>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>execution5</id>
+                        <phase>prepare-package</phase>
+                        <configuration>
+                            <descriptor>src/main/assembly/tool-x86_64-linux-gnu.xml</descriptor>
+                            <finalName>${project.name}-${project.version}/package/x86_64-linux-gnu</finalName>
+                        </configuration>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>execution6</id>
+                        <phase>prepare-package</phase>
+                        <configuration>
+                            <descriptor>src/main/assembly/tool-x86_64-mingw32.xml</descriptor>
+                            <finalName>${project.name}-${project.version}/package/x86_64-mingw32</finalName>
+                        </configuration>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            
+            
+            
+            
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                    <compilerArguments>
+                        <endorseddirs>${endorsed.dir}</endorseddirs>
+                    </compilerArguments>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.3</version>
+                <configuration>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

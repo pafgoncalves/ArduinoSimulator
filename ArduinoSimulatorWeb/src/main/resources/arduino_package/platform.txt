@@ -1,0 +1,10 @@
+
+name=Arduino Simulator
+version=${platform.version}
+
+tools.simupload.path={runtime.tools.simupload.path}
+tools.simupload.upload.params.verbose=-v
+tools.simupload.upload.params.quiet=-q -q
+tools.simupload.upload.pattern=java -jar {path}/ArduinoSimulatorProgrammer-${programmer.version}.jar {upload.verbose} "-Uflash:w:{build.path}/{build.project_name}.hex:i"
+
+

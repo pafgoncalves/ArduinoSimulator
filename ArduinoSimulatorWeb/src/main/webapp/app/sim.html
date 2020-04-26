@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="../jquery-3.3.1.min.js"></script>
+        <script type="text/javascript" src="../jquery-ui-1.12.1.min.js"></script>
+        
+        <script type="text/javascript">
+            function Component(name) {
+                Component.globalId = Component.globalId || 1;
+                this.id = Component.globalId++;
+                this.name = name;
+                this.connections = [];
+                this.values = [];
+                this.x = -1;
+                this.y = -1;
+                this.status = 0;
+            }
+            Component.prototype.setPosition = function(x, y) {
+                this.x = x;
+                this.y = y;
+            }
+            Component.prototype.draw = function(parent) {
+                var v0 = $('<span>',{id:'component_0_'+this.id,style:'position:absolute;left:' + (this.x-10) + 'px;top:'+ (this.y) +'px;'});
+                v0.text(this.values[0]===null?'n':this.values[0]);
+                var v1 = $('<span>',{id:'component_1_'+this.id,style:'position:absolute;left:' + (this.x+60) + 'px;top:'+ (this.y) +'px;'});
+                v1.text(this.values[1]===null?'n':this.values[1]);
+                parent.prepend(v0);
+                parent.prepend(v1);
+            }
+            Component.prototype.setConnection = function(i, obj) {
+                this.connections[i] = obj;
+                this.values[i] = null;
+            }
+            Component.prototype.listConnections = function() {
+                for(var i=0; i<this.connections.length; i++) {
+                    console.log("connection "+i+": "+this.connections[i].getName());
+                }
+            }
+            Component.prototype.listValues = function() {
+                for(var i=0; i<this.values.length; i++) {
+                    console.log("value "+i+": "+this.values[i]);
+                }
+            }
+            Component.prototype.getName = function() {
+                return this.name;
+            }
+            Component.prototype.propagate = function() {
+            }
+            Component.prototype.valueChanged = function(i) {
+//                $('#component_0_'+this.id).text(this.values[0]===null?'n':this.values[0]);
+//                $('#component_1_'+this.id).text(this.values[1]===null?'n':this.values[1]);
+                $('#component_'+i+'_'+this.id).text(this.values[i]===null?'n':this.values[i]);
+            }
+            Component.prototype.setValue = function(obj,value) {
+                var changed = false;
+                for(var i=0; i<this.connections.length; i++) {
+                    if( this.connections[i]===obj ) {
+                        this.values[i] = value;
+                        changed = true;
+                        console.log(this.name+"_"+this.id+"["+i+"] = "+this.values[i]);
+                        this.valueChanged(i);
+                    }
+                }
+//                if( changed ) {
+//                    this.valueChanged();
+//                }
+            }
+            Component.prototype.propagateValue = function(value) {
+                for(var i=0; i<this.connections.length; i++) {
+                    if( this.connections[i] /*&& this.values[i]===null*/) {
+                        this.connections[i].setValue(this,value);
+                    }
+                }
+            }
+
+
+    
+            function Ground() {
+                Component.call(this,"Ground");
+            }
+            Ground.prototype = Object.create(Component.prototype);
+            Ground.prototype.constructor = Ground;
+            Ground.prototype.propagate = function() {
+                this.propagateValue(0);
+            }
+            Ground.prototype.draw = function(parent) {
+                //Component.prototype.draw.call(this,parent);
+                parent.prepend($('<img>',{id:'component_'+this.id,src:'ground.png', style:'max-width:60px;position:absolute;left:' + this.x + 'px;top:'+ this.y +'px;'}));
+            }
+
+
+
+            function Positive() {
+                Component.call(this,"Positive");
+            }
+            Positive.prototype = Object.create(Component.prototype);
+            Positive.prototype.constructor = Positive;
+            Positive.prototype.propagate = function() {
+                this.propagateValue(5);
+            }
+            Positive.prototype.draw = function(parent) {
+                //Component.prototype.draw.call(this,parent);
+                parent.prepend($('<img>',{id:'component_'+this.id,src:'positive.png', style:'max-width:60px;position:absolute;left:' + this.x + 'px;top:'+ this.y +'px;'}));
+            }
+
+    
+    
+            function Led() {
+                Component.call(this,"Led");
+            }
+            Led.prototype = Object.create(Component.prototype);
+            Led.prototype.constructor = Led;
+            Led.prototype.valueChanged = function(i) {
+                Component.prototype.valueChanged.call(this,i);
+                console.log("values[0]: "+this.values[0]);
+                console.log("values[1]: "+this.values[1]);
+                if( this.values[0]!==null && this.values[1]!==null && this.values[0]>this.values[1] ) {
+                    console.log("on");
+                    $('#component_'+this.id).attr("src", "leds-verde.png");
+                } else {
+                    console.log("off");
+                    $('#component_'+this.id).attr("src", "leds-apagado.png");
+                }
+            }
+            Led.prototype.draw = function(parent) {
+                Component.prototype.draw.call(this,parent);
+                var img = $('<img>',{id:'component_'+this.id,src:'leds-apagado.png', style:'max-width:60px;position:absolute;left:' + this.x + 'px;top:'+ this.y +'px;'})
+                var that = this;
+                //http://api.jqueryui.com/draggable/
+                img.draggable({
+                    containment: parent,
+                    drag: function( event, ui ) {
+                        $('#component_0_'+that.id).css({
+                            top: ui.position.top,
+                            left: ui.position.left-10,
+                        });
+                        $('#component_1_'+that.id).css({
+                            top: ui.position.top,
+                            left: ui.position.left+60,
+                        });
+                    }
+                });
+                parent.prepend(img);
+            }
+            
+            
+            
+            function Button() {
+                Component.call(this,"Button");
+            }
+            Button.prototype = Object.create(Component.prototype);
+            Button.prototype.constructor = Button;
+            Button.prototype.valueChanged = function(i) {
+                Component.prototype.valueChanged.call(this,i);
+                console.log("changed "+this.id+" "+i);
+                //this.propagateValue(this.values[1]);
+                //só propaga se o botão estiver fechado
+                if( this.status ) {
+                    var idx = i===0?1:0;
+                    this.connections[idx].setValue(this,this.values[i]);
+                }
+            }
+            Button.prototype.draw = function(parent) {
+                //Object.getPrototypeOf(this.constructor.prototype).draw.call(this,parent);
+                Component.prototype.draw.call(this,parent);
+                var img = $('<img>',{id:'component_'+this.id,src:'switch-on-off.png', style:'max-width:60px;position:absolute;left:' + this.x + 'px;top:'+ this.y +'px;'});
+                var that = this;
+                img.draggable({
+                    containment: parent,
+                    drag: function( event, ui ) {
+                        $('#component_0_'+that.id).css({
+                            top: ui.position.top,
+                            left: ui.position.left-10,
+                        });
+                        $('#component_1_'+that.id).css({
+                            top: ui.position.top,
+                            left: ui.position.left+60,
+                        });
+                    }
+                });
+                img.click(function (e) {
+                    that.status = !that.status;
+                    if( that.status ) {
+                        $('#component_'+that.id).attr("src", "switch-on-off-closed.png");
+                        //that.propagateValue(that.values[0]);
+                        if( that.values[0]!==null ) {
+                            that.connections[1].setValue(that,that.values[0]);
+                        }
+                        if( that.values[1]!==null ) {
+                            that.connections[0].setValue(that,that.values[1]);
+                        }
+                    } else {
+                        $('#component_'+that.id).attr("src", "switch-on-off.png");
+                        that.propagateValue(null);
+                        if( that.values[0]!==null ) {
+                            that.connections[1].setValue(that,null);
+                        }
+                        if( that.values[1]!==null ) {
+                            that.connections[0].setValue(that,null);
+                        }
+                    }
+                    console.log(that.values[0]);
+                    console.log(that.values[1]);
+                });
+                parent.prepend(img);
+            }
+            
+            
+        </script>
+        <script type="text/javascript">
+            $(document).ready(function () {
+                
+                $('#change').click(function (e) {
+                    positive.propagate();
+                });
+                
+                var positive = new Positive();
+                positive.setPosition(50,100);
+
+                var button1 = new Button();
+                button1.setPosition(200,100);
+
+                var button2 = new Button();
+                button2.setPosition(350,100);
+
+                var led1 = new Led();
+                led1.setPosition(500,100);
+                
+                var ground = new Ground();
+                ground.setPosition(650,100);
+                
+
+                console.log("Ligações do led1");
+                led1.listConnections();
+                led1.listValues();
+                
+                positive.setConnection(0,button1);
+                button1.setConnection(0,positive);
+                
+                button1.setConnection(1,button2);
+                button2.setConnection(0,button1);
+                
+                button2.setConnection(1,led1);
+                led1.setConnection(0,button2);
+                
+                led1.setConnection(1,ground);
+                ground.setConnection(0,led1);
+                
+
+                led1.draw($('#circuit'));
+                ground.draw($('#circuit'));
+                positive.draw($('#circuit'));
+                button1.draw($('#circuit'));
+                button2.draw($('#circuit'));
+
+                
+        
+                console.log("-----------------");
+                console.log("Ligações do led1");
+                led1.listConnections();
+                led1.listValues();
+                
+                positive.propagate();
+                ground.propagate();
+                console.log("-----------------");
+                console.log("Ligações do led1");
+                led1.listConnections();
+                led1.listValues();
+                
+            });
+        </script>
+    </head>
+    <body>
+        <div id="circuit" style="position: relative; width: 800px; height: 300px; border: 1px solid black;"></div>
+        <br>
+        <input type="button" id="change" value="Change">
+    </body>
+</html>
