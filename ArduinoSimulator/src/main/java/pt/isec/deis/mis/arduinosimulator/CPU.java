@@ -303,7 +303,7 @@ public abstract class CPU {
         
         nonPullUpThread = new Thread(getPullUpRunnable(),"nonPullUpThread");
         nonPullUpThread.setDaemon(true);
-        nonPullUpThread.start();        
+        nonPullUpThread.start();  //para automaticamente quando o running passa a false      
         
         fireCPUStatusListener(running);
         startTime = System.currentTimeMillis();

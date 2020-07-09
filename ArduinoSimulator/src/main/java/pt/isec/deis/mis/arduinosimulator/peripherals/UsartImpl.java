@@ -7,6 +7,8 @@ package pt.isec.deis.mis.arduinosimulator.peripherals;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import pt.isec.deis.mis.arduinosimulator.CPU;
 import pt.isec.deis.mis.arduinosimulator.DataMemory;
 import pt.isec.deis.mis.arduinosimulator.Peripheral;
@@ -33,11 +35,15 @@ public class UsartImpl implements Peripheral, Usart, DataMemory.DataMemoryChange
     protected boolean rxEnabled = false;
     protected boolean rxInterrupt = false;
     
+    protected boolean sending = false;
+    protected Runnable wait = null;
+    protected ExecutorService pool = null;
+    
     protected List<Integer> buffer = new ArrayList<>();
     
     protected List<UsartListener> listeners = new ArrayList<>();
     
-    public UsartImpl(CPU cpu, int ucsraAddr, int ucsrbAddr, int ucsrcAddr, 
+    public UsartImpl(final CPU cpu, int ucsraAddr, int ucsrbAddr, int ucsrcAddr, 
             int ubrrlAddr, int ubrrhAddr, int udrAddr) {
         
         this.cpu = cpu;
@@ -52,6 +58,22 @@ public class UsartImpl implements Peripheral, Usart, DataMemory.DataMemoryChange
 //        cpu.getSRAM().addDataMemoryChangedListener(this,"0xC0-0xC6");
         cpu.getSRAM().addDataMemoryChangedListener(this, new int[] {UCSRA,UCSRB,UDR});
         cpu.getSRAM().setMemoryCallback(UDR, this);
+        
+        wait = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(1);
+                } catch(Exception e) {}
+                //signal that the buffer is empty
+                cpu.getSRAM().set(UCSRA, cpu.getSRAM().get(UCSRA)|0x20, false);
+                if( txInterrupt ) {
+                    cpu.interrupt();
+                }
+                sending = false;
+            }
+        };
+        
     }
     
     @Override
@@ -60,24 +82,32 @@ public class UsartImpl implements Peripheral, Usart, DataMemory.DataMemoryChange
 
     @Override
     public void start() {
+        pool = Executors.newFixedThreadPool(1);
     }
 
     @Override
     public void stop() {
         //cpu.getSRAM().removeMemoryCallback(UDR);
+        if( pool!=null ) {
+            pool.shutdownNow();
+            pool = null;
+        }
     }
     
     @Override
     public void reset() {
         //condição de reset (p. 283)
         cpu.getSRAM().set(UCSRA, cpu.getSRAM().get(UCSRA)|0x20, false );
+        sending = false;
     }
 
     @Override
     public void dataMemoryChanged(int address) {
         if(address==UCSRA) {
-//          System.out.println("UCSR0A := "+Utils.toHex(cpu.getSRAM().get(UCSRA)));
-            cpu.getSRAM().set(UCSRA, cpu.getSRAM().get(UCSRA)|0x20, false);
+//            System.out.println("UCSR0A := "+Utils.toHex(cpu.getSRAM().get(UCSRA)));
+            if( !sending ) {
+                cpu.getSRAM().set(UCSRA, cpu.getSRAM().get(UCSRA)|0x20, false);
+            }
         } else if( address==UCSRC ) {
 //          System.out.println("UCSR0C := "+Utils.toHex(cpu.getSRAM().get(UCSRC)));
         } else if( address==UBRRL ) {
@@ -99,7 +129,12 @@ public class UsartImpl implements Peripheral, Usart, DataMemory.DataMemoryChange
             }
         } else if( address==UDR ) {
 //                System.out.println("data");
+//            System.out.println("antes UCSRA: "+Utils.toHex(cpu.getSRAM().get(UCSRA)));
             if( txEnabled ) {
+                //ocupado
+                sending = true;
+                cpu.getSRAM().set(UCSRA, cpu.getSRAM().get(UCSRA)&(~0x20), false);
+//                System.out.println("sending UCSRA: "+Utils.toHex(cpu.getSRAM().get(UCSRA)));
 //                    System.out.println("UDR0 := "+Utils.toHex(cpu.getSRAM().get(UDR)));
                 char c = (char)cpu.getSRAM().get(UDR,true);
                 //enviar isto para outro lado e não o STDOUT
@@ -112,10 +147,9 @@ public class UsartImpl implements Peripheral, Usart, DataMemory.DataMemoryChange
 //               if( c<33 | c>125 ) {
 //                  System.out.println("serial: 0x"+Utils.toHex(cpu.getSRAM().get(UDR)));
 //               }
-                //signal that the buffer is empty
-                cpu.getSRAM().set(UCSRA, cpu.getSRAM().get(UCSRA)|0x20, false);
-                //o txInterrupt nunca é gerada porque nós deixamos o buffer
-                //de transmissão SEMPRE vazio
+                if( pool!=null ) {
+                    pool.submit(wait);
+                }
             }
         }
     }

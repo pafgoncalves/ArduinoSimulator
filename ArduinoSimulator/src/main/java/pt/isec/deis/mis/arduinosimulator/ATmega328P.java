@@ -427,12 +427,22 @@ public class ATmega328P extends CPU {
             return true;
         }
 
-        //INT 19: usart0 interrupt
+        //INT 19: usart0 interrupt RX
         //verificar se a interrupção está activa && o buffer está preenchido
         if( (sram.get(UCSR0B.getAddress())&0x80)==0x80 && (sram.get(UCSR0A.getAddress())&0x80)==0x80 ) {
 
             //o vector de interrupção depende do processador
             setPc(0x24);
+            //System.out.println("Interrupção serie");
+            return true;
+        }
+
+        //INT 20: usart0 interrupt UDRE
+        //verificar se a interrupção está activa && o buffer está preenchido
+        if( (sram.get(UCSR0B.getAddress())&0x20)==0x20 && (sram.get(UCSR0A.getAddress())&0x20)==0x20 ) {
+
+            //o vector de interrupção depende do processador
+            setPc(0x26);
             //System.out.println("Interrupção serie");
             return true;
         }
