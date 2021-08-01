@@ -63,7 +63,7 @@ public class UsartImpl implements Peripheral, Usart, DataMemory.DataMemoryChange
             @Override
             public void run() {
                 try {
-                    Thread.sleep(1);
+                    Thread.sleep(2);
                 } catch(Exception e) {}
                 //signal that the buffer is empty
                 cpu.getSRAM().set(UCSRA, cpu.getSRAM().get(UCSRA)|0x20, false);
@@ -88,10 +88,12 @@ public class UsartImpl implements Peripheral, Usart, DataMemory.DataMemoryChange
     @Override
     public void stop() {
         //cpu.getSRAM().removeMemoryCallback(UDR);
-        if( pool!=null ) {
-            pool.shutdownNow();
-            pool = null;
-        }
+        try {
+            if( pool!=null ) {
+                pool.shutdownNow();
+                pool = null;
+            }
+        } catch(Exception e) {}
     }
     
     @Override
@@ -147,9 +149,11 @@ public class UsartImpl implements Peripheral, Usart, DataMemory.DataMemoryChange
 //               if( c<33 | c>125 ) {
 //                  System.out.println("serial: 0x"+Utils.toHex(cpu.getSRAM().get(UDR)));
 //               }
-                if( pool!=null ) {
-                    pool.submit(wait);
-                }
+                try {
+                    if( pool!=null ) {
+                        pool.submit(wait);
+                    }
+                } catch(Exception e) {}
             }
         }
     }
@@ -172,17 +176,21 @@ public class UsartImpl implements Peripheral, Usart, DataMemory.DataMemoryChange
     @Override
     public int readMemoryValue(int address) {
 //        System.out.println("a ler "+Utils.toHex(address, 4));
-        if( !buffer.isEmpty() ) {
-            int c = buffer.remove(0);
-//            System.out.println("leu callback "+Utils.toHex(cpu.getPc(),4)+" "+Utils.toHex(c));
-//            Utils.printStackTrace();
-            if( buffer.isEmpty() ) {
-                //clear the RXC flag
-                //deve ser a chamada da callback a limpar esta flag para ser limpo apenas depois de ser lido o caracter
-                cpu.getSRAM().set(UCSRA, cpu.getSRAM().get(UCSRA)&(~0x80));
-//                System.out.println("limpou interrupção: "+Utils.toHex(cpu.getSRAM().get(UCSRA)));
+        try {
+            if( !buffer.isEmpty() ) {
+                int c = buffer.remove(0);
+//                System.out.println("leu callback "+Utils.toHex(cpu.getPc(),4)+" "+Utils.toHex(c));
+//                Utils.printStackTrace();
+                if( buffer.isEmpty() ) {
+                    //clear the RXC flag
+                    //deve ser a chamada da callback a limpar esta flag para ser limpo apenas depois de ser lido o caracter
+                    cpu.getSRAM().set(UCSRA, cpu.getSRAM().get(UCSRA)&(~0x80));
+//                    System.out.println("limpou interrupção: "+Utils.toHex(cpu.getSRAM().get(UCSRA)));
+                }
+                return c;
             }
-            return c;
+        } catch(Exception e) {
+            e.printStackTrace();
         }
         return 0;
     }
